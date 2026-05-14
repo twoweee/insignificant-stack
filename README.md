@@ -12,5 +12,5 @@ for compiling
 `cmake -S . -B build`  
 `cmake --build build`  
 
->It works on my machine...
->— <cite>unknown</cite>
+>It works on my machine...  
+>- <cite>unknown</cite>
