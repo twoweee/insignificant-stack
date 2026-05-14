@@ -13,4 +13,3 @@ for compiling
 `cmake --build build`  
 
 >It works on my machine...  
-> <cite>unknown</cite>
