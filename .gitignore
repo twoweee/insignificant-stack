@@ -1,0 +1,22 @@
+# Microslop Bindows
+*.exe
+*.pdb
+
+*_exe
+notes.md
+
+# Code samples previously used for testing/other sample and template stuff 
+example*.c
+tTemplTest.c
+old_code/
+
+# Editors
+.vscode/
+.idea/
+# Vim
+*~.swp
+
+dist/*
+build/*
+# So that git saves the directory structure, empty dirs are not kept
+!*.placeholder
