@@ -8,14 +8,12 @@
 #include <cstdio>
 #include <stdexcept>
 
-// --- SafeDescriptor Implementation ---
 SafeDescriptor::SafeDescriptor(int val) : value(val) {}
 SafeDescriptor::~SafeDescriptor() { if (value >= 0) close(value); }
 void SafeDescriptor::set(int val) { if (value >= 0) close(value); value = val; }
 int SafeDescriptor::get() const { return value; }
 SafeDescriptor::operator bool() const { return value >= 0; }
 
-// --- PacketReader Implementation ---
 bool PacketReader::checkValidTapName(const std::string& name) {
     if (name.empty() || name.size() >= IFNAMSIZ) return false;
     for (char c : name) {
