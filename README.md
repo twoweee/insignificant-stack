@@ -11,5 +11,3 @@ afterwards `ping 10.0.0.1` works to test it
 for compiling  
 `cmake -S . -B build`  
 `cmake --build build`  
-
->It works on my machine...  
