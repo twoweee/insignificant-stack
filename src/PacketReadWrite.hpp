@@ -32,7 +32,7 @@ public:
     explicit operator bool() const;
 };
 
-class PacketReader {
+class PacketReadWrite {
 private:
     const std::string tapName;
     const char* chTapName;
@@ -52,13 +52,13 @@ private:
     static int toInt(const std::string& s, const int def);
 
 public:
-    PacketReader(const std::string& tap,
+    PacketReadWrite(const std::string& tap,
                 const std::string& verb,
                 const std::string& max,
                 const std::string& timeout);
 
-    PacketReader(const Args& args);
-    ~PacketReader();
+    PacketReadWrite(const Args& args);
+    ~PacketReadWrite();
 
     int init();
 
@@ -74,6 +74,6 @@ public:
 
     std::array<uint8_t, 6> getMyMac() const;
 
-    PacketReader(const PacketReader&) = delete;
-    PacketReader& operator=(const PacketReader&) = delete;
+    PacketReadWrite(const PacketReadWrite&) = delete;
+    PacketReadWrite& operator=(const PacketReadWrite&) = delete;
 };

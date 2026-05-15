@@ -17,7 +17,7 @@
 #include <sys/epoll.h>
 
 #include "Args.hpp"
-#include "PacketReader.hpp"
+#include "PacketReadWrite.hpp"
 
 // this is just types
 #include "Frames.hpp"
@@ -35,7 +35,7 @@ int appendBytesToStringStream(std::ostringstream& stream, uint8_t* buf, int len,
     return 0;
 }
 
-uint16_t checksum16(const void *data, size_t len)
+uint16_t checksum16(const void *data, size_t len) 
 {
     const uint8_t *ptr = static_cast<const uint8_t *>(data);
     uint32_t sum = 0;
@@ -56,15 +56,15 @@ uint16_t checksum16(const void *data, size_t len)
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
 
-    return static_cast<uint16_t>(~sum);
+    return static_cast<uint16_t>(~sum); // inverse of sum
 }
 
 int main(int argc, char* argv[]) {
     Args passedArgs; 
     passedArgs.parse(argc, argv);
-    std::unique_ptr<PacketReader> packetReader;
+    std::shared_ptr<PacketReadWrite> packetReader;
     try {
-        packetReader = std::make_unique<PacketReader>(passedArgs);
+        packetReader = std::make_shared<PacketReadWrite>(passedArgs);
     } 
     catch (const std::runtime_error& e) {
         std::cerr << "Caught runtime_error: " << e.what() << "\n";
@@ -217,14 +217,14 @@ int main(int argc, char* argv[]) {
             } 
 
             if(!printed) {
-                    log << "Received unrecognized packet: " << packetSize << " bytes\n";
-                        if (packetReader->getVerbose()) {
-                            appendBytesToStringStream(log, buffer.data(), packetSize, 8);
-                        } else {
-                            appendBytesToStringStream(log, buffer.data(), ((packetSize > 4) ? 4 : packetSize), 8);
-                            log << "...";
-                        }
-                    log << "...\n";
+                log << "Received unrecognized packet: " << packetSize << " bytes\n";
+                    if (packetReader->getVerbose()) {
+                        appendBytesToStringStream(log, buffer.data(), packetSize, 8);
+                    } else {
+                        appendBytesToStringStream(log, buffer.data(), ((packetSize > 4) ? 4 : packetSize), 8);
+                        log << "...";
+                    }
+                log << "...\n";
             }
             std::string result = log.str();
             std::cout << result << "\n";
