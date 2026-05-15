@@ -22,7 +22,7 @@
 // this is just types
 #include "Frames.hpp"
 
-int appendBytesToStringStream(std::ostringstream& stream, uint8_t* buf, int len, int lineLen){
+int appendBytesToStringStream(std::ostringstream& stream, uint8_t* buf, int len, int lineLen) {
     for (int j = 0; j < len; j++) {
         stream << std::hex
             << std::setw(2)
@@ -35,8 +35,7 @@ int appendBytesToStringStream(std::ostringstream& stream, uint8_t* buf, int len,
     return 0;
 }
 
-uint16_t checksum16(const void *data, size_t len) 
-{
+uint16_t checksum16(const void *data, size_t len) {
     const uint8_t *ptr = static_cast<const uint8_t *>(data);
     uint32_t sum = 0;
 
@@ -109,7 +108,7 @@ int main(int argc, char* argv[]) {
 
             bool printed = false;
 
-            if (ethernetHeader.etherType == 0x0608){ // ARP
+            if (ethernetHeader.etherType == 0x0608) { // ARP
                 eth_arp_frame_t frame = {};
                 std::memcpy(&frame, buffer.data(), std::min(buffer.size(), sizeof(eth_arp_frame_t)));
                 
@@ -150,7 +149,7 @@ int main(int argc, char* argv[]) {
                     eth_ipv4_icmp_frame_t frame = {};
                     std::memcpy(&frame, buffer.data(), std::min(buffer.size(), sizeof(eth_ipv4_icmp_frame_t)));
                     
-                    if (frame.icmp.type == 0x08){ // PING
+                    if (frame.icmp.type == 0x08) { // PING
                         int icmpPayloadSize = packetSize - sizeof(eth_ipv4_icmp_frame_t);
 
                         log << "Received PING packet: " << packetSize << " bytes\n";
