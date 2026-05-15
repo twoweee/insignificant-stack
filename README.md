@@ -11,3 +11,6 @@ afterwards `ping 10.0.0.1` works to test it
 for compiling  
 `cmake -S . -B build`  
 `cmake --build build`  
+
+run
+`./build/main`
