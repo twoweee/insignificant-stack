@@ -1,4 +1,4 @@
-#include "PacketReader.hpp"
+#include "PacketReadWrite.hpp"
 
 SafeDescriptor::SafeDescriptor(int val) : value(val) {}
 SafeDescriptor::~SafeDescriptor() { if (value >= 0) close(value); }
@@ -6,7 +6,7 @@ void SafeDescriptor::set(int val) { if (value >= 0) close(value); value = val; }
 int SafeDescriptor::get() const { return value; }
 SafeDescriptor::operator bool() const { return value >= 0; }
 
-bool PacketReader::checkValidTapName(const std::string& name) {
+bool PacketReadWrite::checkValidTapName(const std::string& name) {
     if (name.empty() || name.size() >= IFNAMSIZ) return false;
     for (char c : name) {
         if (!std::isalnum(static_cast<unsigned char>(c)) &&
@@ -16,7 +16,7 @@ bool PacketReader::checkValidTapName(const std::string& name) {
     return true;
 }
 
-int PacketReader::toInt(const std::string& s, const int def) {
+int PacketReadWrite::toInt(const std::string& s, const int def) {
     if (s.empty()) return def;
     if (!std::all_of(s.begin(), s.end(), [](unsigned char c){ return std::isdigit(c); }))
         return def;
@@ -24,7 +24,7 @@ int PacketReader::toInt(const std::string& s, const int def) {
     try { return std::stoi(s); } catch (...) { return def; }
 }
 
-PacketReader::PacketReader(const std::string& tap,
+PacketReadWrite::PacketReadWrite(const std::string& tap,
                            const std::string& verb,
                            const std::string& max,
                            const std::string& timeout)
@@ -38,16 +38,16 @@ PacketReader::PacketReader(const std::string& tap,
     if (init()) throw std::runtime_error("initialization failed");
 }
 
-PacketReader::PacketReader(const Args& args)
-    :   PacketReader(args["--tap_name"],
+PacketReadWrite::PacketReadWrite(const Args& args)
+    :   PacketReadWrite(args["--tap_name"],
                    args["--verbose"],
                    args["--epoll_max"],
                    args["--epoll_timeout"])
 {}
 
-PacketReader::~PacketReader() {}
+PacketReadWrite::~PacketReadWrite() {}
 
-int PacketReader::init() {
+int PacketReadWrite::init() {
     descriptor.set(open("/dev/net/tun", O_RDWR));
     if (descriptor.get() < 0) return 1;
 
@@ -69,9 +69,9 @@ int PacketReader::init() {
     return 0;
 }
 
-std::string PacketReader::toString() const {
+std::string PacketReadWrite::toString() const {
     std::ostringstream out;
-    out << "PacketReader:\n";
+    out << "PacketReadWrite:\n";
     out << "TAP name: " << chTapName << "\n";
     out << "verbose: " << (verbose ? "true" : "false") << "\n";
     out << "epoll max events: " << epollMax << "\n";
@@ -79,16 +79,16 @@ std::string PacketReader::toString() const {
     return out.str();
 }
 
-int PacketReader::epollWait() {
+int PacketReadWrite::epollWait() {
     return epoll_wait(epollInstance.get(), events.data(), epollMax, epollTimeout);
 }
 
-int PacketReader::readPacket(uint8_t* data, std::size_t size) {
+int PacketReadWrite::readPacket(uint8_t* data, std::size_t size) {
     return read(descriptor.get(), data, size);
 }
 
 // TODO: i dont trust this non blocking write, make sure its safe or fix it
-int PacketReader::writePacket(const uint8_t* data, std::size_t size) {
+int PacketReadWrite::writePacket(const uint8_t* data, std::size_t size) {
     if (!data || size == 0) return -1;
 
     ssize_t n = write(descriptor.get(), data, size);
@@ -101,10 +101,10 @@ int PacketReader::writePacket(const uint8_t* data, std::size_t size) {
     return static_cast<int>(n);
 }
 
-int PacketReader::getEpollMax() const { return epollMax; }
-bool PacketReader::getVerbose() const { return verbose; }
+int PacketReadWrite::getEpollMax() const { return epollMax; }
+bool PacketReadWrite::getVerbose() const { return verbose; }
 
-std::array<uint8_t, 6> PacketReader::getMyMac() const
+std::array<uint8_t, 6> PacketReadWrite::getMyMac() const
 {
     std::array<uint8_t, 6> mac = {0};
 
