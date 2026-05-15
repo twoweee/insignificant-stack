@@ -1,12 +1,4 @@
 #include "PacketReader.hpp"
-#include <algorithm>
-#include <cctype>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <cerrno>
-#include <cstdio>
-#include <stdexcept>
 
 SafeDescriptor::SafeDescriptor(int val) : value(val) {}
 SafeDescriptor::~SafeDescriptor() { if (value >= 0) close(value); }
@@ -95,5 +87,42 @@ int PacketReader::readPacket(uint8_t* data, std::size_t size) {
     return read(descriptor.get(), data, size);
 }
 
+// TODO: i dont trust this non blocking write, make sure its safe or fix it
+int PacketReader::writePacket(const uint8_t* data, std::size_t size) {
+    if (!data || size == 0) return -1;
+
+    ssize_t n = write(descriptor.get(), data, size);
+    if (n < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return 0;
+        }
+        return -1;
+    }
+    return static_cast<int>(n);
+}
+
 int PacketReader::getEpollMax() const { return epollMax; }
 bool PacketReader::getVerbose() const { return verbose; }
+
+std::array<uint8_t, 6> PacketReader::getMyMac() const
+{
+    std::array<uint8_t, 6> mac = {0};
+
+    SafeDescriptor sock(socket(AF_INET, SOCK_DGRAM, 0));
+    if (sock.get() < 0) {
+        return mac;
+    }
+
+    struct ifreq macIfReq;
+    std::memset(&macIfReq, 0, sizeof(macIfReq));
+
+    std::snprintf(macIfReq.ifr_name, IFNAMSIZ, "%s", chTapName);
+
+    if (ioctl(sock.get(), SIOCGIFHWADDR, &macIfReq) == 0) {
+        std::memcpy(mac.data(),
+                    macIfReq.ifr_hwaddr.sa_data,
+                    6);
+    }
+
+    return mac;
+}

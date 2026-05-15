@@ -8,6 +8,13 @@
 #include <linux/if.h>
 #include <linux/if_tun.h>
 #include <sys/epoll.h>
+#include <algorithm>
+#include <cctype>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <cerrno>
+#include <cstdio>
 
 #include "Args.hpp"
 
@@ -60,8 +67,12 @@ public:
     int epollWait();
     int readPacket(uint8_t* data, std::size_t size);
 
+    int writePacket(const uint8_t* data, std::size_t size);
+
     int getEpollMax() const;
     bool getVerbose() const;
+
+    std::array<uint8_t, 6> getMyMac() const;
 
     PacketReader(const PacketReader&) = delete;
     PacketReader& operator=(const PacketReader&) = delete;
